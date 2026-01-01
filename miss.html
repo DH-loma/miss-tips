@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 强化手机端视口适配，禁止缩放，确保弹窗位置计算准确 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>思念弹窗</title>
+    <style>
+        /* 弹窗样式：微调尺寸，适配手机小屏 */
+        .tip-window {
+            position: absolute;
+            width: 100px; /* 缩小宽度，适配手机 */
+            height: 36px; /* 缩小高度，适配手机 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: "微软雅黑", sans-serif;
+            font-size: 12px; /* 缩小字体，避免文字溢出 */
+            border-radius: 5px;
+            z-index: 999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 增加阴影，提升手机端视觉层次 */
+        }
+        /* 最后变色提示框样式：微调尺寸，适配手机 */
+        .final-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px; /* 缩小宽度，适配手机 */
+            height: 60px; /* 缩小高度，适配手机 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: "微软雅黑", sans-serif;
+            font-size: 16px; /* 缩小字体，适配手机 */
+            font-weight: bold;
+            border-radius: 8px;
+            z-index: 9999; /* 置顶显示 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* 增加阴影，提升视觉效果 */
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // 1. 温馨提示语列表（增加数量，确保覆盖手机屏幕）
+        const tips = [
+            "保持微笑呀", "每天都要元气满满", "好好爱自己", "早点休息",
+            "今天过得开心嘛", "期待下一次见面", "多喝水利~", "天冷了，多穿衣服",
+            "别熬夜", "我想你了", "梦想成真", "保持好心情",
+            "愿所有烦恼都消失", "顺顺利利", "记得吃水果", "万事胜意",
+            "平安喜乐", "前路坦荡", "不负韶华", "未来可期",
+            "三餐四季", "岁岁年年", "平安顺遂", "喜乐无忧",
+            "慢慢相遇", "好好生活", "不负遇见", "不谈亏欠"
+        ];
+
+        // 2. 背景颜色列表
+        const bgColors = [
+            '#ff9aa2', '#ffb7b2', '#ffdbc5', '#e2f0cb', '#b5ead7', '#c7ceea', '#fdcfe8',
+            '#a29bfe', '#fd79a8', '#00b894', '#00cec9', '#0984e3', '#6c5ce7', '#a29bfe'
+        ];
+
+        // 3. 创建随机弹窗函数（核心修改：替换变量名 window -> tipWindow）
+        function createTipWindow() {
+            const tip = tips[Math.floor(Math.random() * tips.length)];
+            const bgColor = bgColors[Math.floor(Math.random() * bgColors.length)];
+            
+            // 关键修改：不再使用 window 作为变量名，避免覆盖内置对象
+            const tipWindow = document.createElement('div');
+            tipWindow.className = 'tip-window';
+            tipWindow.innerText = tip;
+            tipWindow.style.backgroundColor = bgColor;
+            
+            // 随机设置弹窗位置（此时能正确获取浏览器视口尺寸，适配手机/电脑）
+            const screenWidth = window.innerWidth; // 访问内置 window 对象，获取正确视口宽度
+            const screenHeight = window.innerHeight; // 访问内置 window 对象，获取正确视口高度
+            const x = Math.floor(Math.random() * (screenWidth - 100)); // 对应弹窗宽度 100px
+            const y = Math.floor(Math.random() * (screenHeight - 36)); // 对应弹窗高度 36px
+            tipWindow.style.left = `${x}px`;
+            tipWindow.style.top = `${y}px`;
+            
+            document.body.appendChild(tipWindow);
+            
+            // 3秒后移除弹窗
+            setTimeout(() => {
+                if (document.body.contains(tipWindow)) {
+                    document.body.removeChild(tipWindow);
+                }
+            }, 3000);
+        }
+
+        // 4. 批量创建弹窗（优化手机端节奏，避免卡顿：减少数量+延长间隔）
+        function createBatchWindows() {
+            let count = 0;
+            // 手机端优化：间隔延长至 15ms，数量减少至 150 个，降低性能压力
+            const interval = setInterval(() => {
+                createTipWindow();
+                count++;
+                if (count >= 150) {
+                    clearInterval(interval);
+                    // 弹窗创建完成后，显示最后变色提示框
+                    setTimeout(showFinalWindow, 2000);
+                }
+            }, 15);
+        }
+
+        // 5. 显示最后变色提示框“我好想你啊”
+        function showFinalWindow() {
+            const finalColors = ['#ff3366', '#ff9900', '#33cc33', '#3399ff'];
+            let colorIndex = 0;
+            
+            const finalWindow = document.createElement('div');
+            finalWindow.className = 'final-window';
+            finalWindow.innerText = '我好想你啊';
+            finalWindow.style.backgroundColor = finalColors[0];
+            
+            document.body.appendChild(finalWindow);
+            
+            // 颜色切换（每500毫秒换一次）
+            const colorInterval = setInterval(() => {
+                colorIndex = (colorIndex + 1) % finalColors.length;
+                finalWindow.style.backgroundColor = finalColors[colorIndex];
+            }, 500);
+            
+            // 5秒后移除最后提示框并结束
+            setTimeout(() => {
+                clearInterval(colorInterval);
+                if (document.body.contains(finalWindow)) {
+                    document.body.removeChild(finalWindow);
+                }
+            }, 5000);
+        }
+
+        // 6. 启动程序
+        createBatchWindows();
+    </script>
+</body>
+</html>
